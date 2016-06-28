@@ -5,15 +5,21 @@ import (
 	"fmt"
 )
 
-type UserRespository interface {
+type UserRepository interface {
 	Store(user User)
-	GetById(id int) User
+	FindById(id int) User
 }
 
 type User struct {
 	Id       int
 	IsAdmin  bool
-	customer domain.Customer
+	Customer domain.Customer
+}
+
+type Item struct {
+	Id    int
+	Name  string
+	value float64
 }
 
 type Logger interface {
@@ -21,16 +27,16 @@ type Logger interface {
 }
 
 type OrderInteractor struct {
-	UserRespository  UserRespository
-	OrderRespository domain.OrderRespository
-	ItemRespository  domain.ItemRespository
-	Logger           Logger
+	UserRepository  UserRepository
+	OrderRepository domain.OrderRepository
+	ItemRepository  domain.ItemRepository
+	Logger          Logger
 }
 
 func (interactor *OrderInteractor) Items(userId, orderId int) ([]Item, error) {
 	var items []Item
-	user := UserRespository.FindById(userId)
-	order := OrderRespository.FindById(orderId)
+	user := interactor.UserRepository.FindById(userId)
+	order := interactor.OrderRepository.FindById(orderId)
 	if user.Customer.Id != order.Customer.Id {
 		message := "User #%i (customer #%) "
 		message += "is not allowed to see items "
@@ -46,12 +52,13 @@ func (interactor *OrderInteractor) Items(userId, orderId int) ([]Item, error) {
 
 	items = make([]Item, len(order.Items))
 	for i, item := range order.Items {
-		items[i] = Item(item.Id, item.Name, item.Value)
+		items[i] = Item{item.Id, item.Name, item.Value}
 	}
+	return items, nil
 }
 
 func (interactor *OrderInteractor) Add(userId, orderId, itemId int) error {
-
+	return nil
 }
 
 type AdminOrderInteractor struct {
@@ -59,5 +66,5 @@ type AdminOrderInteractor struct {
 }
 
 func (interactor *AdminOrderInteractor) Add(userId, orderId, itemId int) error {
-
+	return nil
 }

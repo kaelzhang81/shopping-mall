@@ -49,9 +49,11 @@ func (repo *DbUserRepo) Store(user usecases.User) {
 func NewDbCustomerRepo(dbHandlers map[string]DbHandler) *DbCustomerRepo {
 	repo := new(DbCustomerRepo)
 	repo.dbHandlers = dbHandlers
+	repo.dbHandler = dbHandlers["DbCustomerRepo"]
 	return repo
 }
 
 func (repo *DbCustomerRepo) Store(customer domain.Customer) {
-
+	repo.dbHandler.Exexute(fmt.Sprintf(`INSERT INTO customers (id, name) 
+                                        VALUES ('%d', '%v')`, customer.Id, customer.Name))
 }

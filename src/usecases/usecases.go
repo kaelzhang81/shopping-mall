@@ -19,7 +19,7 @@ type User struct {
 type Item struct {
 	Id    int
 	Name  string
-	value float64
+	Value float64
 }
 
 type Logger interface {

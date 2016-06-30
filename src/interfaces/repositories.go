@@ -8,7 +8,7 @@ import (
 
 type DbHandler interface {
 	Execute(statment string)
-	Query(statement string)
+	Query(statement string) Row
 }
 
 type Row interface {
@@ -46,6 +46,21 @@ func (repo *DbUserRepo) Store(user usecases.User) {
 	dbCustomerRepo.Store(user.Customer)
 }
 
+func (repo *DbUserRepo) FindById(id int) usecases.User {
+	row := repo.dbHandler.Query(fmt.Sprintf(`SELECT is_admin, customer_id FROM users WHERE id = '%d' LIMIT 1`, id))
+	var isAdmin string
+	var customerId int
+	row.Next()
+	row.Scan(&isAdmin, &customerId)
+	customerRepo := NewDbCustomerRepo(repo.dbHandlers)
+	user := usecases.User{Id: id, Customer: customerRepo.FindById(customerId)}
+	user.IsAdmin = false
+	if isAdmin == "yes" {
+		user.IsAdmin = true
+	}
+	return user
+}
+
 func NewDbCustomerRepo(dbHandlers map[string]DbHandler) *DbCustomerRepo {
 	repo := new(DbCustomerRepo)
 	repo.dbHandlers = dbHandlers
@@ -54,6 +69,11 @@ func NewDbCustomerRepo(dbHandlers map[string]DbHandler) *DbCustomerRepo {
 }
 
 func (repo *DbCustomerRepo) Store(customer domain.Customer) {
-	repo.dbHandler.Exexute(fmt.Sprintf(`INSERT INTO customers (id, name) 
+	repo.dbHandler.Execute(fmt.Sprintf(`INSERT INTO customers (id, name) 
                                         VALUES ('%d', '%v')`, customer.Id, customer.Name))
+}
+
+func (repo *DbCustomerRepo) FindById(id int) domain.Customer {
+	customer := domain.Customer{}
+	return customer
 }

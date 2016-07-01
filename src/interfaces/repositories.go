@@ -100,3 +100,47 @@ func (repo *DbOrderRepo) Store(order domain.Order) {
 			item.Id, order.Id))
 	}
 }
+
+func (repo *DbOrderRepo) FindById(id int) domain.Order {
+	row := repo.dbHandler.Query(fmt.Sprintf(`SELECT customer_id FROM orders 
+                                            WHERE id = '%d'`,
+		id))
+	var customer_id int
+	row.Next()
+	row.Scan(&customer_id)
+	dbCustomerRepo := NewDbCustomerRepo(repo.dbHandlers)
+	customer := dbCustomerRepo.FindById(customer_id)
+	order := domain.Order{Id: id, Customer: customer}
+	var itemId int
+	dbItemRepo := NewDbItemRepo(repo.dbHandlers)
+	row = dbItemRepo.dbHandler.Query(fmt.Sprintf(`SELECT itme_id From items2order 
+                                                    WHERE order_id = '%d'`,
+		id))
+
+	for row.Next() {
+		row.Scan(&itemId)
+		order.Add(dbItemRepo.FindById(itemId))
+	}
+	return order
+}
+
+func NewDbItemRepo(dbHandlers map[string]DbHandler) *DbItemRepo {
+	repo := new(DbItemRepo)
+	repo.dbHandlers = dbHandlers
+	repo.dbHandler = dbHandlers["DbItemRepo"]
+	return repo
+}
+
+func (repo *DbItemRepo) Store(item domain.Item) {
+	available := "no"
+	if item.Available {
+		available = "yes"
+	}
+	repo.dbHandler.Execute(fmt.Sprintf(`INSERT INTO items (id, name, value, available) 
+                                        VALUES ('%d', '%v', '%f', '%v')`,
+		item.Id, item.Name, item.Value, available))
+}
+
+func (repo *DbItemRepo) FindById(id int) domain.Item {
+	return nil
+}

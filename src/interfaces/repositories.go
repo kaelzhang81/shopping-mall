@@ -142,5 +142,17 @@ func (repo *DbItemRepo) Store(item domain.Item) {
 }
 
 func (repo *DbItemRepo) FindById(id int) domain.Item {
-	return nil
+	row := repo.dbHandler.Query(fmt.Sprintf(`SELECT name, value, available From items 
+                                        WHERE id = 'id' LIMIT 1`,
+		id))
+	var name string
+	var value float64
+	var available string
+	row.Next()
+	row.Scan(&name, &value, &available)
+	item := domain.Item{Id: id, Name: name, Value: value, Available: false}
+	if available == "yes" {
+		item.Available = true
+	}
+	return item
 }

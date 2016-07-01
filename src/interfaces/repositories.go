@@ -74,6 +74,29 @@ func (repo *DbCustomerRepo) Store(customer domain.Customer) {
 }
 
 func (repo *DbCustomerRepo) FindById(id int) domain.Customer {
-	customer := domain.Customer{}
+	row := repo.dbHandler.Query(fmt.Sprintf(`SELECT name FROM customers WHERE id = '%d' LIMIT 1`, id))
+	var name string
+	row.Next()
+	row.Scan(&name)
+	customer := domain.Customer{Id: id, Name: name}
 	return customer
+}
+
+func NewDbOrderRepo(dbHandlers map[string]DbHandler) *DbOrderRepo {
+	repo := new(DbOrderRepo)
+	repo.dbHandlers = dbHandlers
+	repo.dbHandler = dbHandlers["DbOrderRepo"]
+	return repo
+}
+
+func (repo *DbOrderRepo) Store(order domain.Order) {
+	repo.dbHandler.Execute(fmt.Sprintf(`INSERT INTO orders (id, customer_id) 
+                                        VALUES ('%d', '%v')`,
+		order.Id, order.Customer.Id))
+
+	for _, item := range order.Items {
+		repo.dbHandler.Execute(fmt.Sprintf(`INSERT INTO items2order (item_id, order_id)
+                                            VALUES ('%d', '%d')`,
+			item.Id, order.Id))
+	}
 }

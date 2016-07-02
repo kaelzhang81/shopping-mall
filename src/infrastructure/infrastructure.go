@@ -2,7 +2,7 @@ package infrastructure
 
 import (
 	"database/sql"
-	//	"fmt"
+	"fmt"
 	"interfaces"
 )
 
@@ -15,7 +15,14 @@ func (handler *SqliteHandler) Execute(statement string) {
 }
 
 func (handler *SqliteHandler) Query(statement string) interfaces.Row {
-	return nil
+	rows, err := handler.Conn.Query(statement)
+	if err != nil {
+		fmt.Println(err)
+		return new(SqliteRow)
+	}
+	row := new(SqliteRow)
+	row.Rows = rows
+	return row
 }
 
 type SqliteRow struct {
@@ -28,4 +35,11 @@ func (row SqliteRow) Next() bool {
 
 func (row SqliteRow) Scan(dest ...interface{}) {
 	row.Rows.Scan(dest...)
+}
+
+func NewSqliteHandler(dbFileName string) *SqliteHandler {
+	conn, _ := sql.Open("sqlite3", dbFileName)
+	sqliteHandler := new(SqliteHandler)
+	sqliteHandler.Conn = conn
+	return sqliteHandler
 }

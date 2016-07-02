@@ -23,9 +23,9 @@ type SqliteRow struct {
 }
 
 func (row SqliteRow) Next() bool {
-	return true
+	return row.Rows.Next()
 }
 
 func (row SqliteRow) Scan(dest ...interface{}) {
-
+	row.Rows.Scan(dest...)
 }

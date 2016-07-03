@@ -26,10 +26,10 @@ type DbCustomerRepo DbRepo
 type DbOrderRepo DbRepo
 type DbItemRepo DbRepo
 
-func NewDbUserRepo(DbHandlers map[string]DbHandler) *DbUserRepo {
+func NewDbUserRepo(dbHandlers map[string]DbHandler) *DbUserRepo {
 	dbUserRepo := new(DbUserRepo)
-	dbUserRepo.dbHandlers = DbHandlers
-	dbUserRepo.dbHandler = DbHandlers["DbUserRepo"]
+	dbUserRepo.dbHandlers = dbHandlers
+	dbUserRepo.dbHandler = dbHandlers["DbUserRepo"]
 	return dbUserRepo
 }
 

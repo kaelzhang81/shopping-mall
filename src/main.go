@@ -3,6 +3,7 @@ package main
 import (
 	"infrastructure"
 	"interfaces"
+	"net/http"
 	"usecases"
 )
 
@@ -19,4 +20,13 @@ func main() {
 	orderInteractor.UserRepository = interfaces.NewDbUserRepo(handlers)
 	orderInteractor.OrderRepository = interfaces.NewDbOrderRepo(handlers)
 	orderInteractor.ItemRepository = interfaces.NewDbItemRepo(handlers)
+
+	webserviceHandler := interfaces.WebServiceHandler{}
+	webserviceHandler.OrderInteractor = orderInteractor
+
+	http.HandleFunc("/orders", func(res http.ResponseWriter, req *http.Request) {
+		webserviceHandler.ShowOrder(res, req)
+	})
+
+	http.ListenAndServe(":8080", nil)
 }

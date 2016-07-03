@@ -14,11 +14,11 @@ type OrderInteractor interface {
 	Add(userId, orderId, itemId int) error
 }
 
-type webServiceHandler struct {
+type WebServiceHandler struct {
 	OrderInteractor OrderInteractor
 }
 
-func (handler webServiceHandler) ShowOrder(res http.ResponseWriter, req *http.Request) {
+func (handler WebServiceHandler) ShowOrder(res http.ResponseWriter, req *http.Request) {
 	userId, _ := strconv.Atoi(req.FormValue("userId"))
 	orderId, _ := strconv.Atoi(req.FormValue("orderId"))
 	items, _ := handler.OrderInteractor.Items(userId, orderId)
